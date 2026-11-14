@@ -122,11 +122,11 @@ $("thHome").onclick=()=>{if(sel.value==="")return;const i=+sel.value,bt=$("thHom
 sel.addEventListener("change",()=>{thArm=0;$("thHome").textContent=THL});
 function renderThemeBox(){updateHome();const b=$("thbox");if(cur<0||!RVD){b.innerHTML="";return}
  const t=THM[cur];if(t!==undefined){b.innerHTML=`<div class="col" style="text-align:center"><h3>🎽 ชุดธีมของกลุ่ม</h3><div style="font-size:1.5rem;font-weight:800">${TH[t].e} ${TH[t].n}</div></div>`;return}
+ if(dbc&&P.size<D.names.length&&repOf(cur)<0){b.innerHTML="";return}
  const ms=gi(cur),c=tally(cur),rp=repOf(cur),done=ms.filter(i=>VOTES[i]!==undefined).length;
  let h='<div class="col" style="text-align:center"><h3>🗳️ โหวตตัวแทนกลุ่ม</h3>';
  if(rp>=0){h+=`<div>👑 ตัวแทนกลุ่ม: <b>${D.names[rp]}</b>${rp===me?" (คุณ)":""}</div>`;h+=rp===me?'<button class="btn" id="thgo">🎽 จับชุดธีมให้กลุ่ม</button>':`<div class="sub" style="margin-top:8px">รอ ${D.names[rp]} กดสุ่มชุดธีม…</div>`}
- else if(dbc&&P.size<D.names.length){h+=`<div class="sub">⏳ โหวตตัวแทนได้เมื่อทุกคนกดสุ่มกลุ่มครบ<br>(กดแล้ว ${P.size}/${D.names.length} คน)</div>`}
-  else{const tie=done===ms.length?" · คะแนนเสมอ ต้องโหวตใหม่":"";
+ else{const tie=done===ms.length?" · คะแนนเสมอ ต้องโหวตใหม่":"";
   if(VOTES[me]!==undefined&&!CHG){h+=`<div class="sub">✅ คุณโหวต <b>${D.names[VOTES[me]]}</b> แล้ว<br>(โหวตแล้ว ${done}/${ms.length} คน${tie})</div><div class="sub">รอเพื่อนโหวตให้ครบ…</div><button class="btn card-back" id="chg">เปลี่ยนโหวต</button>`}
   else{h+=`<div class="sub">เลือกเพื่อนในกลุ่ม 1 คนเป็นตัวแทน แล้วกดยืนยัน (โหวตแล้ว ${done}/${ms.length} คน)</div>`+ms.map(i=>`<button class="btn vt${PEND===i?" on":""}" data-i="${i}">${PEND===i?"✔ ":""}${D.names[i]}${i===me?" (คุณ)":""}</button>`).join("")+`<button class="btn" id="vok" ${PEND<0?"disabled":""}>ยืนยันโหวต</button>`}}
  b.innerHTML=h+'</div>';const g=$("thgo");if(g)g.onclick=()=>{FROMHOME=false;openTheme()};b.querySelectorAll(".vt").forEach(x=>x.onclick=()=>{PEND=+x.dataset.i;renderThemeBox()});const vo=$("vok");if(vo)vo.onclick=()=>{if(PEND<0)return;CHG=false;castVote(PEND)};const ch=$("chg");if(ch)ch.onclick=()=>{CHG=true;PEND=VOTES[me];renderThemeBox()}}
