@@ -116,7 +116,10 @@ function castVote(i){VOTES[me]=i;renderThemeBox();try{if(DB)DB.collection("confi
 function updateHome(){const b=$("thHome"),h=$("thHint");if(!b)return;if(sel.value===""){b.disabled=true;h.textContent="เลือกชื่อของคุณก่อน";return}
  const i=+sel.value,g=D.team[i],rp=repOf(g);if(rp===i){b.disabled=false;h.textContent="คุณคือตัวแทนกลุ่ม 👑"}else{b.disabled=true;h.textContent=rp>=0?"คุณไม่ใช่ตัวแทนกลุ่ม":"ยังไม่มีตัวแทนกลุ่ม (รอเพื่อนโหวตให้ครบ)"}}
 sel.onchange=updateHome;
-$("thHome").onclick=()=>{if(sel.value==="")return;const i=+sel.value;if(!confirm("ยืนยันว่าคุณคือ "+D.names[i]+" ใช่ไหม?"))return;me=i;if(repOf(D.team[i])!==i)return;FROMHOME=true;cur=-1;openTheme()};
+let thArm=0;const THL="🎽 ตัวแทนกลุ่ม: จับชุดธีม";
+$("thHome").onclick=()=>{if(sel.value==="")return;const i=+sel.value,bt=$("thHome");if(!thArm){thArm=1;bt.textContent="ยืนยันว่าคุณคือ "+D.names[i]+" — แตะอีกครั้ง";setTimeout(()=>{thArm=0;bt.textContent=THL},5000);return}
+ thArm=0;bt.textContent=THL;me=i;if(repOf(D.team[i])!==i)return;FROMHOME=true;cur=-1;openTheme()};
+sel.addEventListener("change",()=>{thArm=0;$("thHome").textContent=THL});
 function renderThemeBox(){updateHome();const b=$("thbox");if(cur<0||!RVD){b.innerHTML="";return}
  const t=THM[cur];if(t!==undefined){b.innerHTML=`<div class="col" style="text-align:center"><h3>🎽 ชุดธีมของกลุ่ม</h3><div style="font-size:1.5rem;font-weight:800">${TH[t].e} ${TH[t].n}</div></div>`;return}
  const ms=gi(cur),c=tally(cur),rp=repOf(cur),done=ms.filter(i=>VOTES[i]!==undefined).length;
@@ -128,12 +131,12 @@ function renderThemeBox(){updateHome();const b=$("thbox");if(cur<0||!RVD){b.inne
  b.innerHTML=h+'</div>';const g=$("thgo");if(g)g.onclick=()=>{FROMHOME=false;openTheme()};b.querySelectorAll(".vt").forEach(x=>x.onclick=()=>{PEND=+x.dataset.i;renderThemeBox()});const vo=$("vok");if(vo)vo.onclick=()=>{if(PEND<0)return;CHG=false;castVote(PEND)};const ch=$("chg");if(ch)ch.onclick=()=>{CHG=true;PEND=VOTES[me];renderThemeBox()}}
 function showTheme(t){R2.forEach((r,j)=>{r.className="sign"+(j===t?" on win":" off")});$("go2").disabled=true;$("note2").textContent="กลุ่มของคุณได้ชุด "+TH[t].e+" "+TH[t].n}
 function openTheme(){const g=D.team[me];if(THM[g]===undefined&&repOf(g)!==me)return;$("who2").textContent=T[g].e+" "+T[g].n;R2.forEach(r=>r.className="sign");$("back2").style.display="block";if(THM[g]!==undefined){showTheme(THM[g])}else{$("go2").disabled=false;$("note2").textContent="กดได้ครั้งเดียวต่อกลุ่ม — เฉพาะตัวแทนที่กลุ่มโหวตเลือก"}showPg("p4")}
-async function drawTheme(){const g=D.team[me];if(THM[g]===undefined&&repOf(g)!==me)return;ac();loadSnd();BUSY=true;$("go2").disabled=true;$("back2").style.display="none";let t=THM[g];
+async function drawTheme(){const g=D.team[me];if(THM[g]===undefined&&repOf(g)!==me)return;ac();loadSnd();BUSY=true;$("go2").disabled=true;$("back2").style.display="none";let t=THM[g];await loadSnd();
  if(t===undefined){try{if(DB)t=await DB.runTransaction(async tx=>{const ref=DB.collection("config").doc("theme"),sn=await tx.get(ref),m=(sn.exists&&sn.data().map)||{};if(m[g]!==undefined)return m[g];const used=Object.values(m),free=[0,1,2].filter(x=>!used.includes(x)),pick=free[Math.random()*free.length|0];m[g]=pick;tx.set(ref,{map:m});return pick})}catch(e){}
   if(t===undefined){const free=[0,1,2].filter(x=>!Object.values(THM).includes(x));t=free[Math.random()*free.length|0]}}
  R2.forEach(r=>r.className="sign");const K=16+t,lit=i=>{R2.forEach((r,j)=>r.classList.toggle("on",j===i));tone(480+i*110,.07,"square",.05)};
  for(let k=0;k<K;k++){lit(k%3);await sl(70+k*22)}
- await sl(600);R2.forEach((r,j)=>{r.classList.remove("on");if(j!==t)r.classList.add("off")});R2[t].classList.add("on","win");fireworks();if(!play("th"+t,1))crowd();await sl(4500);
+ await sl(600);R2.forEach((r,j)=>{r.classList.remove("on");if(j!==t)r.classList.add("off")});R2[t].classList.add("on","win");fireworks();play("th"+t,1);await sl(4500);
  BUSY=false;THM[g]=t;showTheme(t);$("back2").style.display="block";renderThemeBox();renderAdmin()}
 $("home").onclick=()=>{if(BUSY)return;RUN++;cur=-1;RVD=false;renderThemeBox();$("go").disabled=false;R.forEach(r=>r.className="sign");showPg("p1")};$("go2").onclick=drawTheme;$("back2").onclick=()=>showPg(FROMHOME?"p1":"p3");
 let pg="p1";function showPg(x){pg=x;route()}
